@@ -7,6 +7,7 @@ global:
     ue: MAX_NUM_UE
 
 sgwc:
+    freeDiameter: /open5gs/install/etc/freeDiameter/sgwc.conf
     gtpc:
       server:
         - address: SGWC_IP

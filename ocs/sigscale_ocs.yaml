@@ -1,0 +1,40 @@
+### Sigscale OCS
+
+services:
+  ocs:
+    image: sigscale/ocs
+    container_name: ocs
+      #entrypoint: /bin/bash
+    stdin_open: true
+    tty: true
+    env_file:
+      - .env
+    volumes:
+      - db:/home/otp/db   # Mount the named volume to /home/otp/db inside the container
+    environment:
+      - COMPONENT_NAME=ocs
+    hostname: ocs.epc.mnc094.mcc235.3gppnetwork.org
+    expose:
+      - "8080/tcp"
+      - "1812/tcp"
+      - "1813/tcp"
+      - "3868/udp"
+      - "3868/tcp"
+      - "3868/sctp"
+    ports:
+      - "8080:8080/tcp"
+        #cap_add:
+        #- NET_ADMIN
+        #privileged: true
+    networks:
+      default:
+        ipv4_address: ${OCS_IP}
+networks:
+  default:
+    external:
+      name: docker_open5gs_default
+
+volumes:
+  db:
+    name: db              # Use the existing named volume "db"
+
