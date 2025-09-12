@@ -43,6 +43,7 @@ then
 fi
 cp /mnt/smf/smf.conf install/etc/freeDiameter
 cp /mnt/smf/make_certs.sh install/etc/freeDiameter
+cp /mnt/smf/rt_default.conf install/etc/freeDiameter
 
 sed -i 's|SMF_IP|'$SMF_IP'|g' install/etc/open5gs/smf.yaml
 sed -i 's|SCP_IP|'$SCP_IP'|g' install/etc/open5gs/smf.yaml

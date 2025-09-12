@@ -101,6 +101,62 @@ services:
     networks:
       default:
         ipv4_address: ${SGWU_IP}
+  smf:
+    image: docker_open5gs
+    depends_on:
+      - sgwc
+    container_name: smf
+    env_file:
+      - .env
+    environment:
+      - COMPONENT_NAME=smf
+      - DEPLOY_MODE=ALL
+    volumes:
+      - ./smf:/mnt/smf
+      - ./log:/open5gs/install/var/log/open5gs
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    expose:
+      - "3868/tcp"
+      - "3868/sctp"
+      - "5868/tcp"
+      - "5868/sctp"
+      - "8805/udp"
+      - "2123/udp"
+      - "7777/tcp"
+      - "9091/tcp"
+    networks:
+      default:
+        ipv4_address: ${SMF_IP}
+  upf:
+    image: docker_open5gs
+    depends_on:
+      - smf
+    container_name: upf
+    env_file:
+      - .env
+    environment:
+      - COMPONENT_NAME=upf
+    volumes:
+      - ./upf:/mnt/upf
+      - ./log:/open5gs/install/var/log/open5gs
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    expose:
+      - "2152/udp"
+      - "8805/udp"
+      - "9091/tcp"
+    # ports:
+    #   - "2152:2152/udp"
+    cap_add:
+      - NET_ADMIN
+    privileged: true
+    sysctls:
+      - net.ipv4.ip_forward=1
+      #- net.ipv6.conf.all.disable_ipv6=0
+    networks:
+      default:
+        ipv4_address: ${UPF_IP}
   mme:
     image: docker_open5gs
     depends_on:
@@ -237,6 +293,26 @@ services:
     networks:
       default:
         ipv4_address: ${OCS_IP}
+  enb-simulator:
+    image: enb-python
+    container_name: enb
+    entrypoint: /bin/bash
+    stdin_open: true
+    tty: true
+    env_file:
+      - .env
+    environment:
+      - COMPONENT_NAME=enb
+    depends_on:
+      - mme
+    expose:
+      - "5000/udp"
+    cap_add:
+      - NET_ADMIN
+    privileged: true
+    networks:
+      default:
+        ipv4_address: ${SRS_ENB_IP}
 networks:
   default:
     name: docker_open5gs_default
