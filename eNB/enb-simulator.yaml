@@ -1,0 +1,25 @@
+### eNB simulator for 4G LTE core.
+
+services:
+  enb-simulator:
+    image: enb-python
+    container_name: enb1
+    entrypoint: /bin/bash
+    stdin_open: true
+    tty: true
+    env_file:
+      - .env
+    environment:
+      - COMPONENT_NAME=enb1
+    expose:
+      - "5000/udp"
+    cap_add:
+      - NET_ADMIN
+    privileged: true
+    networks:
+      default:
+        ipv4_address: ${SRS_ENB_IP}
+networks:
+  default:
+    external:
+      name: docker_open5gs_default
