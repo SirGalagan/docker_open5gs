@@ -1,4 +1,53 @@
 # docker_open5gs
+Based on https://github.com/herlesupreeth/docker_open5gs
+
+Simplified deployment steps for 4G LTE implementation with eNB simulator by https://github.com/fasferraz/eNB.git
+
+```
+git clone https://github.com/herlesupreeth/docker_open5gs
+cd docker_open5gs/base/
+
+sudo docker build --no-cache --force-rm -t docker_open5gs .
+```
+
+
+```
+cd eNB
+sudo docker build -t enb-python .
+```
+
+```
+sudo docker-compose -f deploy-LTE.yaml up
+```
+
+++ Create subscriber via webui
+++ add PGWC as client via OCS gui
+
+```
+sudo docker exec -it enb bash
+python3 eNB_LOCAL.py -i 172.100.0.22 -m 172.100.0.9 -I 235940000000002 -K 8baf473f2f8fd09487cccbd7097c6862 -P 11111111111111111111111111111111 --tac1 1 -A internet -o 23594
+
+# Reset S1AP
+16
+# S1 Setup
+15
+# Attach
+20
+
+# Activate GTP-U/IP over ControlPlane - to be able to send ping over GTPU
+50
+
+# Ping from the UE/eNB using the internet apn:
+ping 8.8.8.8 -I tun1
+
+# install curl + download 10MB file:
+apt-get update
+apt-get install curl
+curl --interface tun1 -o /dev/null http://speedtest.tele2.net/10MB.zip
+```
+
+# Original instructions:
+
 Quite contrary to the name of the repository, this repository contains docker files to deploy an Over-The-Air (OTA) or RF simulated 4G/5G network using following projects:
 - Core Network (4G/5G) - open5gs - https://github.com/open5gs/open5gs
 - IMS (VoLTE + VoNR) - kamailio - https://github.com/kamailio/kamailio
