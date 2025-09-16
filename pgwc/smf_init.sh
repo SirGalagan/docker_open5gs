@@ -26,35 +26,48 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+export LC_ALL=C.UTF-8
+export LANG=C.UTF-8
 export IP_ADDR=$(awk 'END{print $1}' /etc/hosts)
 export IF_NAME=$(ip r | awk '/default/ { print $5 }')
 
 [ ${#MNC} == 3 ] && EPC_DOMAIN="epc.mnc${MNC}.mcc${MCC}.3gppnetwork.org" || EPC_DOMAIN="epc.mnc0${MNC}.mcc${MCC}.3gppnetwork.org"
 
-cp /mnt/mme/mme.yaml install/etc/open5gs
-cp /mnt/mme/mme.conf install/etc/freeDiameter
-cp /mnt/mme/make_certs.sh install/etc/freeDiameter
+UE_IPV4_INTERNET_LTE_APN_GATEWAY_IP=$(python3 /mnt/smf/ip_utils.py --ip_range $UE_IPV4_INTERNET_LTE)
+UE_IPV4_IMS_TUN_IP=$(python3 /mnt/smf/ip_utils.py --ip_range $UE_IPV4_IMS)
 
-sed -i 's|MNC|'$MNC'|g' install/etc/open5gs/mme.yaml
-sed -i 's|MCC|'$MCC'|g' install/etc/open5gs/mme.yaml
-sed -i 's|TAC|'$TAC'|g' install/etc/open5gs/mme.yaml
-sed -i 's|MME_IP|'$MME_IP'|g' install/etc/open5gs/mme.yaml
-sed -i 's|MME_IF|'$IF_NAME'|g' install/etc/open5gs/mme.yaml
-sed -i 's|OSMOMSC_IP|'$OSMOMSC_IP'|g' install/etc/open5gs/mme.yaml
-sed -i 's|SGWC_IP|'$SGWC_IP'|g' install/etc/open5gs/mme.yaml
-sed -i 's|PGWC_IP|'$PGWC_IP'|g' install/etc/open5gs/mme.yaml
-sed -i 's|MAX_NUM_UE|'$MAX_NUM_UE'|g' install/etc/open5gs/mme.yaml
-sed -i 's|MME_IP|'$MME_IP'|g' install/etc/freeDiameter/mme.conf
-sed -i 's|HSS_IP|'$HSS_IP'|g' install/etc/freeDiameter/mme.conf
-sed -i 's|EPC_DOMAIN|'$EPC_DOMAIN'|g' install/etc/freeDiameter/mme.conf
-sed -i 's|LD_LIBRARY_PATH|'$LD_LIBRARY_PATH'|g' install/etc/freeDiameter/mme.conf
+cp /mnt/smf/smf.yaml install/etc/open5gs
+cp /mnt/smf/pgwc.conf install/etc/freeDiameter
+cp /mnt/smf/make_certs.sh install/etc/freeDiameter
+cp /mnt/smf/rt_default.conf install/etc/freeDiameter
+
+sed -i 's|PGWC_IP|'$PGWC_IP'|g' install/etc/open5gs/smf.yaml
+sed -i 's|SCP_IP|'$SCP_IP'|g' install/etc/open5gs/smf.yaml
+sed -i 's|NRF_IP|'$NRF_IP'|g' install/etc/open5gs/smf.yaml
+sed -i 's|PGWU_IP|'$PGWU_IP'|g' install/etc/open5gs/smf.yaml
+sed -i 's|PGWC_DNS1|'$PGWC_DNS1'|g' install/etc/open5gs/smf.yaml
+sed -i 's|PGWC_DNS2|'$PGWC_DNS2'|g' install/etc/open5gs/smf.yaml
+sed -i 's|UE_IPV4_INTERNET_LTE_APN_GATEWAY_IP|'$UE_IPV4_INTERNET_LTE_APN_GATEWAY_IP'|g' install/etc/open5gs/smf.yaml
+sed -i 's|UE_IPV4_INTERNET_LTE_APN_SUBNET|'$UE_IPV4_INTERNET_LTE'|g' install/etc/open5gs/smf.yaml
+sed -i 's|UE_IPV4_IMS_TUN_IP|'$UE_IPV4_IMS_TUN_IP'|g' install/etc/open5gs/smf.yaml
+sed -i 's|UE_IPV4_IMS_SUBNET|'$UE_IPV4_IMS'|g' install/etc/open5gs/smf.yaml
+sed -i 's|PCSCF_IP|'$PCSCF_IP'|g' install/etc/open5gs/smf.yaml
+sed -i 's|MAX_NUM_UE|'$MAX_NUM_UE'|g' install/etc/open5gs/smf.yaml
+sed -i 's|PGWC_IP|'$PGWC_IP'|g' install/etc/freeDiameter/pgwc.conf
+sed -i 's|PCRF_IP|'$PCRF_IP'|g' install/etc/freeDiameter/pgwc.conf
+sed -i 's|EPC_DOMAIN|'$EPC_DOMAIN'|g' install/etc/freeDiameter/pgwc.conf
+sed -i 's|PCRF_BIND_PORT|'$PCRF_BIND_PORT'|g' install/etc/freeDiameter/pgwc.conf
+sed -i 's|LD_LIBRARY_PATH|'$LD_LIBRARY_PATH'|g' install/etc/freeDiameter/pgwc.conf
 sed -i 's|EPC_DOMAIN|'$EPC_DOMAIN'|g' install/etc/freeDiameter/make_certs.sh
+sed -i 's|OCS_BIND_PORT|'$OCS_BIND_PORT'|g' install/etc/freeDiameter/pgwc.conf
+sed -i 's|OCS_IP|'$OCS_IP'|g' install/etc/freeDiameter/pgwc.conf
+sed -i 's|OSMOEPDG_IP|'$OSMOEPDG_IP'|g' install/etc/freeDiameter/pgwc.conf
 
 # Generate TLS certificates
 ./install/etc/freeDiameter/make_certs.sh install/etc/freeDiameter
 
 cd install/bin
-exec ./open5gs-mmed $@
+exec ./open5gs-smfd $@
 
 # Sync docker time
 #ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone

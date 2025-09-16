@@ -1,0 +1,49 @@
+logger:
+    file:
+      path: /open5gs/install/var/log/open5gs/pgwc.log
+
+global:
+  max:
+    ue: MAX_NUM_UE
+  parameter:
+      no_ipv4v6_local_addr_in_packet_filter: true
+
+smf:
+    freeDiameter: /open5gs/install/etc/freeDiameter/pgwc.conf
+    gtpc:
+      server:
+        - address: PGWC_IP
+    gtpu:
+      server:
+        - address: PGWC_IP
+    pfcp:
+      server:
+        - address: PGWC_IP
+      client:
+        upf:
+          - address: PGWU_IP
+    session:
+      - subnet: UE_IPV4_INTERNET_LTE_APN_SUBNET
+        gateway: UE_IPV4_INTERNET_LTE_APN_GATEWAY_IP
+        dnn: internet
+      - subnet: 2001:230:cafe::/48
+        gateway: 2001:230:cafe::1
+        dnn: internet
+      - subnet: UE_IPV4_IMS_SUBNET
+        gateway: UE_IPV4_IMS_TUN_IP
+        dnn: ims
+      - subnet: 2001:230:babe::/48
+        gateway: 2001:230:babe::1
+        dnn: ims
+    dns:
+      - PGWC_DNS1
+      - PGWC_DNS2
+      - 2001:4860:4860::8888
+      - 2001:4860:4860::8844
+    p-cscf:
+      - PCSCF_IP
+    mtu: 1450
+    metrics:
+      server:
+        - address: PGWC_IP
+          port: 9091
